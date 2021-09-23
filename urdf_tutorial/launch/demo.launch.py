@@ -40,19 +40,20 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'use_sim_time',
             default_value='false',
-            description='Use simulation (Gazebo) clock if true'),
-
+            description='Use simulation (Gazebo) clock if true'
+        ),
         Node(
             package='robot_state_publisher',
-            executable='robot_state_publisher',
+            node_executable='robot_state_publisher',
             name='robot_state_publisher',
             output='screen',
             parameters=[{'use_sim_time': use_sim_time}],
-            arguments=[urdf]),
-
+            arguments=[urdf]
+        ),
         Node(
             package='urdf_tutorial',
-            executable='state_publisher',
+            node_executable='state_publisher',
             name='state_publisher',
-            output='screen'),
+            output='screen'
+        ),
     ])
