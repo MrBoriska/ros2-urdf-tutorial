@@ -23,6 +23,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+from launch.actions.execute_process import ExecuteProcess
 
 
 def generate_launch_description():
@@ -35,6 +36,12 @@ def generate_launch_description():
     urdf = os.path.join(
         get_package_share_directory('urdf_tutorial'),
         urdf_file_name)
+
+    state_publisher = ExecuteProcess(
+        cmd=['python3', 'state_publisher.py'],
+        output='screen',
+        cwd=get_package_share_directory('urdf_tutorial')
+    )
 
     return LaunchDescription([
         DeclareLaunchArgument(
@@ -50,10 +57,11 @@ def generate_launch_description():
             parameters=[{'use_sim_time': use_sim_time}],
             arguments=[urdf]
         ),
-        Node(
-            package='urdf_tutorial',
-            node_executable='state_publisher',
-            name='state_publisher',
-            output='screen'
-        ),
+        #Node(
+        #    package='urdf_tutorial',
+        #    node_executable='state_publisher',
+        #    name='state_publisher',
+        #    output='screen'
+        #),
+        state_publisher
     ])

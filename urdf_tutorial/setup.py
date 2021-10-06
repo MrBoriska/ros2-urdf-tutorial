@@ -16,7 +16,9 @@ setup(
         # Include all launch files
         (os.path.join('share', package_name), glob('launch/*.py')),
         # Include model and simulation files
-        (os.path.join('share', package_name), glob('urdf/*'))
+        (os.path.join('share', package_name), glob('urdf/*')),
+        # Include script files
+        (os.path.join('share', package_name), glob('urdf_tutorial/*.py'))
     ],
     install_requires=['setuptools'],
     zip_safe=True,
