@@ -1,16 +1,10 @@
-#! /usr/bin/env python
-
 from math import sin, cos, pi
-import threading
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile
 from geometry_msgs.msg import Quaternion
 from sensor_msgs.msg import JointState
-#from tf2 import TransformBroadcaster, TransformStamped
-from geometry_msgs.msg import TransformStamped
-from tf2_msgs.msg import TFMessage
-import time
+from tf2_ros import TransformBroadcaster, TransformStamped
 
 class StatePublisher(Node):
 
@@ -19,13 +13,13 @@ class StatePublisher(Node):
         super().__init__('state_publisher')
 
         qos_profile = QoSProfile(depth=10)
-        self.joint_pub = self.create_publisher(JointState, 'joint_states', qos_profile)  # JointStates
-        self.tf_pub = self.create_publisher(TFMessage, "/tf", qos_profile)
-        #self.broadcaster = TransformBroadcaster(self, qos=qos_profile)
+        self.joint_pub = self.create_publisher(JointState, 'joint_states', qos_profile)
+        self.broadcaster = TransformBroadcaster(self, qos=qos_profile)
         self.nodeName = self.get_name()
         self.get_logger().info("{0} started".format(self.nodeName))
 
         degree = pi / 180.0
+        loop_rate = self.create_rate(30)
 
         # robot state
         tilt = 0.
@@ -43,7 +37,7 @@ class StatePublisher(Node):
 
         try:
             while rclpy.ok():
-                #rclpy.spin_once(self)
+                rclpy.spin_once(self)
 
                 # update joint_state
                 now = self.get_clock().now()
@@ -62,10 +56,7 @@ class StatePublisher(Node):
 
                 # send the joint state and transform
                 self.joint_pub.publish(joint_state)
-
-                tf_msg = TFMessage()
-                tf_msg.transforms = [odom_trans]
-                self.tf_pub.publish(tf_msg)
+                self.broadcaster.sendTransform(odom_trans)
 
                 # Create new robot state
                 tilt += tinc
@@ -78,14 +69,10 @@ class StatePublisher(Node):
                 angle += degree/4
 
                 # This will adjust as needed per iteration
-                time.sleep(1.0/30.0)
+                loop_rate.sleep()
 
         except KeyboardInterrupt:
             pass
-        
-        self.destroy_node()
-        rclpy.shutdown()
-
 
 def euler_to_quaternion(roll, pitch, yaw):
     qx = sin(roll/2) * cos(pitch/2) * cos(yaw/2) - cos(roll/2) * sin(pitch/2) * sin(yaw/2)
@@ -97,7 +84,5 @@ def euler_to_quaternion(roll, pitch, yaw):
 def main():
     node = StatePublisher()
 
-
 if __name__ == '__main__':
     main()
-
